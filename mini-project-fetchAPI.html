@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>React Uncover</title>
+  <style>
+    #root {
+      display: flex;
+      justify-content: center;
+    }
+
+    div {
+      text-align: center;
+    }
+
+    button {
+      background-color: white;
+      cursor: pointer;
+      padding: 10px 20px;
+      font-weight: bold;
+      border: 1px solid gray;
+      box-shadow: 2px 2px 2px black;
+      margin: 30px 10px;
+    }
+
+    button:hover {
+      box-shadow: 1px 1px 1px black;
+      background-color: #f1f1f1;
+    }
+
+    img {
+      margin: 10px;
+      border: 1px solid black;
+      padding: 5px;
+      border-radius: 3px 3px;
+    }
+
+    figcaption {
+      text-align: center;
+      background-color: gainsboro;
+      font-size: 1.5em;
+      padding: 10px 20px;
+      margin: 15px 0;
+      box-shadow: 12px 12px 0px black;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script type="text/babel">
+
+    // Jumlah data di API cuma ada 12 users
+    const User = () => {
+      const [user, setUser] = React.useState([]);
+      const [errorStatus, setErrorStatus] = React.useState(false);
+      const [loadingStatus, setLoadingStatus] = React.useState(true);
+      const [userId, setUserId] = React.useState(1);
+
+      React.useEffect(() => {
+        const myFetch = async () => {
+          try {
+            setLoadingStatus(true)
+            let url = `https://reqres.in/api/users/${userId}?delay=1`;
+            let response = await fetch(url);
+            if (!response.ok) {
+              setErrorStatus(true);
+              throw new Error(`Terjadi gangguan dengan kode: 
+                              ${response.status}`);
+            }
+            let data = await response.json();
+            setUser(data.data);
+            setErrorStatus(false);
+            console.log(data.data);
+          }
+          catch (error) {
+            console.log(error);
+          }
+          finally {
+            setLoadingStatus(false);
+          }
+        }
+        myFetch();
+      }, [userId]);
+
+      if (loadingStatus) {
+        return <div><h1>Loading...</h1></div>
+      }
+      else if (errorStatus) {
+        return (
+          <div>
+            <h1>Terjadi Gangguan...</h1>
+            <button onClick={() => setUserId(userId > 1 ? userId - 1 : userId)}>Prev User</button>
+            <button onClick={() => setUserId(userId < 12 ? userId + 1 : userId)}>Next User</button>
+          </div >
+        )
+      }
+      else {
+        return (
+          <div>
+            {console.log('proses render')}
+            <h1>{`${user.first_name} ${user.last_name}`}</h1>
+            <figure>
+              <img src={user.avatar} alt={`${user.first_name}`} />
+              <figcaption>{user.email}</figcaption>
+            </figure>
+            <button onClick={() => setUserId(userId > 1 ? userId - 1 : userId)}>Prev User</button>
+            <button onClick={() => setUserId(userId < 12 ? userId + 1 : userId)}>Next User</button>
+          </div >
+        )
+      }
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<User />);
+  </script>
+</body>
+
+</html>
